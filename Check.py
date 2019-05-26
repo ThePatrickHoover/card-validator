@@ -1,65 +1,49 @@
+from re import search
 import sys
+
 # check for valid input
+def get_input_from_cmd(args_list):
+    if len(args_list) != 2:
+        raise Exception("Expected a 16-digit number as input argument")
+    return args_list[1]
 
-if len(sys.argv) == 2:
-    try:
-        int(sys.argv[1])
-        if(len(str(sys.argv[1])) == 16):
-            pass
-        else:
-            print("Not 16 digits!")
-            sys.exit()
-    except ValueError:
-        print('Not an integer!')
-        sys.exit()
-else:
-    print('Not enough or too many command line arguments! \n Proper use \"python Check.py <credit card number here> \" ')
-    sys.exit()
-
-def main():
-    # put the digits into a list
-    number = convertToList(sys.argv[1])
-    sum = cardCheck(number)
-    if (sum%10 == 0):
-        print('Valid Card!')
-    else:
-        print('Invalid Card!')
-
-#converts initial passed int variable to list
-def convertToList(num):
-    numStr = str(num)
-    numList = []
-    for digit in numStr:
-        numList.append(int(digit))
-    return (numList)
-
-def cardCheck(digitList, count = 0):
-    sum = 0
-    #if digit is every second digit multiply by 2
-    if(count%2 == 0 & count < 15):
-        digitList[count] = (digitList[count] * 2)
-        #if is 2 digit number after multiplication
-        if(digitList[count] >= 10):
-            digitList[count] = addDigits(digitList[count])
-            cardCheck(digitList, count + 1)
-        else:
-            cardCheck(digitList, count + 1)
-    #progresses program
-    elif(count < 15):
-        cardCheck(digitList, count + 1)
-    else:
-        return 0
-    for digits in digitList:
-        sum += int(digits)
-    return sum
+def is_input_valid(input_str):
+    return bool(search(r"\d{16}", input_str))
 
 #resolve 2 digit number conflict by adding the digits of the number and returning it
-def addDigits(num):
-    list = str(num)
-    sum = 0
-    for digits in list:
-        sum += int(digits)
-    return sum
+def sum_of_digits(num):
+    num_list = convert_to_list(num)
+    return sum(num_list)
+
+#converts initial passed str variable to list
+def convert_to_list(num):
+    result = [int(x) for x in str(num)]
+    return result
+
+
+def main():
+    input_string = get_input_from_cmd(sys.argv)
+    if is_input_valid(input_string):
+        digits_list = convert_to_list(input_string)
+        card_valid =  card_check(digits_list)
+        if card_valid:
+            print('Valid Card!')
+        else:
+            print('Invalid Card!')
+    else:
+        print('Invalid Card Number!')
+
+def card_check(digits_list, count = 0):
+    if count % 2 == 0:
+        digits_list[count] *= 2
+        if digits_list[count] >= 10:
+            digits_list[count] = sum_of_digits(digits_list[count])
+    if count < 15:
+        card_check(digits_list, count + 1)
+    else:
+        return 0
+    result = bool(sum(digits_list)%10 == 0)
+    return result
 
 if __name__ == '__main__':
         main()
